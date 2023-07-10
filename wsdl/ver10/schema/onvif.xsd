@@ -7681,20 +7681,19 @@ and sample rate. </xs:documentation>
 			</xs:enumeration>
 		</xs:restriction>
 	</xs:simpleType>
-	<!--===============================-->
-	<xs:complexType name="RecordingEncryption">
+	<xs:simpleType name="KID">
+		<xs:restriction base="xs:hexBinary">
+			<xs:length value="16"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="StaticKeyEncryption">
 		<xs:sequence>
-			<xs:element name="KID">
-				<xs:simpleType>
-					<xs:restriction base="xs:hexBinary">
-						<xs:length value="16"/>
-					</xs:restriction>
-				</xs:simpleType>
+			<xs:element name="KID" type="tt:KID">
 				<xs:annotation>
 					<xs:documentation>Key ID of the associated key for encryption.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
-			<xs:element name="Key" type="xs:hexBinary" minOccurs="0">
+			<xs:element name="Key" type="xs:hexBinary">
 				<xs:annotation>
 					<xs:documentation>
 						Key for encrypting content.
@@ -7702,6 +7701,30 @@ and sample rate. </xs:documentation>
 					</xs:documentation>
 				</xs:annotation>
 			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CertificateEncryption">
+		<xs:sequence>
+			<xs:element name="CertificateID" type="tas:CertificateID" minOccurs="1" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>List of certificates used to encrypt the symmetric key for the PSSH box.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="KeyRotationDuration" type="xs:duration" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>
+					Frequency at which the device shall generate a new key to encrypt a new segment. 
+					If not specified, key rotation is disabled. 
+					KeyRotationDuration must be a positive duration value.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<!--===============================-->
+	<xs:complexType name="RecordingEncryption">
+		<xs:sequence>
+			<xs:element name="StaticKey" type="tt:StaticKeyEncryption" minOccurs="0" maxOccurs="1" />
+			<xs:element name="Certificate" type="tt:CertificateEncryption" minOccurs="0" maxOccurs="1" />
 			<xs:element name="Track" type="xs:string" minOccurs="0" maxOccurs="unbounded">
 				<xs:annotation>
 					<xs:documentation>
@@ -7709,16 +7732,6 @@ and sample rate. </xs:documentation>
 						If no track tokens are specified, all tracks are encrypted and no other encryption configurations shall exist for the recording.
 						Each track shall only be contained in one encryption configuration.
 					</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="CertificateId" type="tas:CertificateID" minOccurs="0" maxOccurs="unbounded">
-				<xs:annotation>
-					<xs:documentation>List of certificates used to encrypt the symmetric key for the PSSH box.</xs:documentation>
-				</xs:annotation>
-			</xs:element>
-			<xs:element name="KeyRotationDuration" type="xs:duration" minOccurs="0">
-				<xs:annotation>
-					<xs:documentation>Frequency at which the device shall generate a new key to encrypt a new segment. If not specified, key rotation is disabled.</xs:documentation>
 				</xs:annotation>
 			</xs:element>
 			<xs:any namespace="##any" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>   <!-- first ONVIF then Vendor -->
